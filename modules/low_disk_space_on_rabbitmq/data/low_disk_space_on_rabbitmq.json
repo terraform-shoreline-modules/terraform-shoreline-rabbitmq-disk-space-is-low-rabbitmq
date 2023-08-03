@@ -1,0 +1,170 @@
+{
+  "name": "low_disk_space_on_rabbitmq",
+  "description": "This incident type refers to an alert triggered when the available disk space on RabbitMQ is low. This can be caused by an overload of messages or persistent messages that are being mismanaged. It is important to resolve this issue promptly to ensure the proper functioning of RabbitMQ and avoid any potential downtime.",
+  "params": [
+    {
+      "name": "RABBITMQ_ERROR_LOG",
+      "value": ""
+    },
+    {
+      "name": "RABBITMQ_PASSWORD",
+      "value": ""
+    },
+    {
+      "name": "RABBITMQ_PORT",
+      "value": ""
+    },
+    {
+      "name": "RABBITMQ_HOST",
+      "value": ""
+    },
+    {
+      "name": "RABBITMQ_CONFIG_FILE",
+      "value": ""
+    },
+    {
+      "name": "RABBITMQ_USER",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Low Disk Space on RabbitMQ\nThis incident type refers to an alert triggered when the available disk space on RabbitMQ is low. This can be caused by an overload of messages or persistent messages that are being mismanaged. It is important to resolve this issue promptly to ensure the proper functioning of RabbitMQ and avoid any potential downtime."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check disk usage for the partition where RabbitMQ is installed"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `df -h`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the size of the RabbitMQ data directory"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `du -sh /opt/rabbitmq/data`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the size of the RabbitMQ message queue"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo rabbitmqctl list_queues name messages_ready messages_unacknowledged`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the size of the RabbitMQ log files"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `ls -lh /opt/rabbitmq/logs`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the RabbitMQ configuration file for disk space related settings"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `cat ${RABBITMQ_CONFIG_FILE} | grep disk`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the RabbitMQ process status"
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo systemctl status rabbitmq-server`"
+    },
+    {
+      "name": "cell_14",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the RabbitMQ error log for disk space related errors"
+    },
+    {
+      "name": "cell_15",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo cat ${RABBITMQ_ERROR_LOG} | grep disk`"
+    },
+    {
+      "name": "cell_16",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the system log for disk related errors"
+    },
+    {
+      "name": "cell_17",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo cat /var/log/syslog | grep disk`"
+    },
+    {
+      "name": "cell_18",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check if there are any old or unused files that can be deleted to free up space"
+    },
+    {
+      "name": "cell_19",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `sudo find / -xdev -type f -atime +30 -size +10M -exec ls -lh {} \\;`"
+    },
+    {
+      "name": "cell_20",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Identify any messages or persistent messages that are being mismanaged and take action to resolve the issue (e.g., delete unnecessary messages, optimize message storage)."
+    },
+    {
+      "name": "cell_21",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_rabbitmq_queue_cleanup($RABBITMQ_PASSWORD, $RABBITMQ_PORT, $RABBITMQ_HOST, $RABBITMQ_USER)"
+    }
+  ]
+}
